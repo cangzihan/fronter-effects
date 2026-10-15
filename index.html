@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>年会暖场视频</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .page.active {
+            opacity: 1;
+        }
+
+        .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15vw;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .page-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 8vw;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4);
+            animation: glow 2s ease-in-out infinite alternate;
+            margin-bottom: 3vh;
+        }
+
+        .subtitle {
+            font-size: 3vw;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            animation: fadeInUp 1.5s ease-out;
+        }
+
+        .year {
+            font-size: 12vw;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #ffd700, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: scaleIn 1s ease-out;
+            margin-bottom: 2vh;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4);
+            }
+            to {
+                text-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.6);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #ffd700 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        .page1-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .page2-bg {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .page3-bg {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .page4-bg {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .page5-bg {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        .progress {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: #ffd700;
+            transform: scale(1.3);
+        }
+
+        .photo-wall {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            perspective: 1200px;
+        }
+
+        .photo-wall-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        .page.active .photo-wall-item {
+            animation: photoFlyIn 1.2s cubic-bezier(0.22, 0.8, 0.3, 1) both,
+                       photoFloat 5s ease-in-out infinite;
+        }
+
+        .photo-wall-item:hover {
+            z-index: 10;
+        }
+
+        .photo-wall-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+
+        .photo-wall-item:hover img {
+            transform: scale(1.12);
+        }
+
+        @keyframes photoFlyIn {
+            0% {
+                opacity: 0;
+                transform: translateZ(-1400px) rotateY(var(--rot, 0deg)) scale(1.3);
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 1;
+                transform: translateZ(0) rotateY(0deg) scale(1);
+            }
+        }
+
+        @keyframes photoFloat {
+            0%, 100% {
+                transform: translateY(0) translateZ(0);
+            }
+            50% {
+                transform: translateY(-10px) translateZ(0);
+            }
+        }
+
+        .photo-wall-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3vw;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.4);
+            background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%);
+        }
+
+        .heart-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heart-shape {
+            position: relative;
+            animation: heartbeat 1.8s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            15% { transform: scale(1.04); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.04); }
+            60% { transform: scale(1); }
+        }
+
+        .heart-photo {
+            position: absolute;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            transition: transform 0.3s;
+        }
+
+        .heart-photo:hover {
+            transform: scale(1.15);
+            z-index: 100;
+        }
+
+        .heart-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .heart-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2vmin;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.8);
+            background: linear-gradient(135deg, #ff8a8a 0%, #e05555 100%);
+        }
+
+        .pan-gallery {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 300%;
+            background: linear-gradient(180deg, #141e30 0%, #243b55 35%, #2c3e50 70%, #1a1a2e 100%);
+            z-index: 2;
+        }
+
+        .page.active .pan-gallery {
+            animation: panDown var(--pan-duration, 8s) ease-in-out both;
+        }
+
+        @keyframes panDown {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(calc(100vh - 100%));
+            }
+        }
+
+        .framed-photo {
+            position: absolute;
+            width: 24vw;
+            background: #fdfdf8;
+            padding: 1.2vw 1.2vw 4.2vw;
+            border-radius: 4px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
+            transform: rotate(var(--tilt, 0deg));
+        }
+
+        .frame-imgbox {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        .frame-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3vw;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.35);
+            background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%);
+        }
+
+        .frame-label {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 1.1vw;
+            text-align: center;
+            font-family: 'Kaiti', 'STKaiti', 'Microsoft YaHei', cursive;
+            font-size: 1.5vw;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container"></div>
+    
+    <div class="progress" id="progress"></div>
+    
+    <div class="controls">
+        <button class="control-btn" onclick="prevPage()">◀</button>
+        <button class="control-btn" onclick="togglePlay()" id="playBtn">⏸</button>
+        <button class="control-btn" onclick="nextPage()">▶</button>
+    </div>
+
+    <script>
+        const pages = [
+            {
+                type: 'title',
+                year: '2026',
+                title: '新年盛典',
+                subtitle: '携手共进 · 再创辉煌',
+                bgClass: 'page1-bg'
+            },
+            {
+                type: 'photoWall',
+                images: ['0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009', '0010', '0011', '0012'],
+                caption: '精彩瞬间'
+            },
+            {
+                type: 'photo',
+                imageId: '0002',
+                caption: '难忘时刻'
+            },
+            {
+                type: 'title',
+                title: '感恩有你',
+                subtitle: '一路同行 · 共创未来',
+                bgClass: 'page2-bg'
+            },
+            {
+                type: 'panGallery',
+                caption: '团队风采',
+                duration: 9000,
+                photos: [
+                    { id: '0019', text: '那年夏天', top: 3, left: 6, tilt: -6 },
+                    { id: '0020', text: '一起拼搏', top: 8, left: 64, tilt: 5 },
+                    { id: '0021', text: '欢笑时光', top: 20, left: 34, tilt: -3 },
+                    { id: '0022', text: '并肩前行', top: 27, left: 4, tilt: 6 },
+                    { id: '0023', text: '精彩每一刻', top: 38, left: 66, tilt: -5 },
+                    { id: '0024', text: '团队力量', top: 47, left: 22, tilt: 4 },
+                    { id: '0025', text: '共同成长', top: 58, left: 58, tilt: -4 },
+                    { id: '0026', text: '难忘回忆', top: 66, left: 8, tilt: 5 },
+                    { id: '0027', text: '未来可期', top: 78, left: 40, tilt: -6 },
+                    { id: '0028', text: '我们', top: 88, left: 68, tilt: 3 }
+                ]
+            },
+            {
+                type: 'heart',
+                images: ['0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009', '0010', '0011', '0012', '0013', '0014', '0015', '0016', '0017', '0018'],
+                caption: '用心记录'
+            },
+            {
+                type: 'title',
+                year: '2026',
+                title: '新年快乐',
+                subtitle: '万事如意 · 前程似锦',
+                bgClass: 'page5-bg'
+            }
+        ];
+
+        let currentPage = 0;
+        let isPlaying = true;
+        let playTimer = null;
+
+        function createParticles() {
+            const particles = document.createElement('div');
+            particles.className = 'particles';
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particles.appendChild(particle);
+            }
+            
+            return particles;
+        }
+
+        function createPhotoWallItem(imageId, index) {
+            const item = document.createElement('div');
+            item.className = 'photo-wall-item';
+            
+            const col = index % 4;
+            item.style.setProperty('--rot', (col < 2 ? 25 : -25) + 'deg');
+            item.style.animationDelay = `${index * 0.12}s, ${1.2 + index * 0.12}s`;
+            
+            const img = document.createElement('img');
+            img.dataset.imageId = imageId;
+            img.style.display = 'none';
+            item.appendChild(img);
+            
+            const placeholder = document.createElement('div');
+            placeholder.className = 'photo-wall-placeholder';
+            placeholder.textContent = imageId;
+            item.appendChild(placeholder);
+            
+            img.onload = function() {
+                placeholder.style.display = 'none';
+                this.style.display = 'block';
+            };
+            
+            img.onerror = function() {
+                placeholder.style.display = 'flex';
+                this.style.display = 'none';
+            };
+            
+            const jpgPath = `assets/${imageId}.jpg`;
+            const pngPath = `assets/${imageId}.png`;
+            
+            const testImg = new Image();
+            testImg.onload = function() {
+                img.src = jpgPath;
+            };
+            testImg.onerror = function() {
+                img.src = pngPath;
+            };
+            testImg.src = jpgPath;
+            
+            return item;
+        }
+
+        function createHeartPhoto(imageId) {
+            const photo = document.createElement('div');
+            photo.className = 'heart-photo';
+            
+            const img = document.createElement('img');
+            img.dataset.imageId = imageId;
+            img.style.display = 'none';
+            photo.appendChild(img);
+            
+            const placeholder = document.createElement('div');
+            placeholder.className = 'heart-placeholder';
+            placeholder.textContent = imageId;
+            photo.appendChild(placeholder);
+            
+            img.onload = function() {
+                placeholder.style.display = 'none';
+                this.style.display = 'block';
+            };
+            
+            img.onerror = function() {
+                placeholder.style.display = 'flex';
+                this.style.display = 'none';
+            };
+            
+            const jpgPath = `assets/${imageId}.jpg`;
+            const pngPath = `assets/${imageId}.png`;
+            
+            const testImg = new Image();
+            testImg.onload = function() {
+                img.src = jpgPath;
+            };
+            testImg.onerror = function() {
+                img.src = pngPath;
+            };
+            testImg.src = jpgPath;
+            
+            return photo;
+        }
+
+        function layoutHeart(shape) {
+            const rows = [2, 4, 6, 3, 2, 1];
+            const cw = window.innerWidth;
+            const ch = window.innerHeight;
+            const W = Math.min(cw * 0.94 / 6.3, ch * 0.86 / 3.675);
+            const H = W * 9 / 16;
+            const gap = W * 0.06;
+            const u = W + gap;
+            const TW = 6 * u - gap;
+            const TH = 6 * H + 5 * gap;
+            
+            shape.style.width = TW + 'px';
+            shape.style.height = TH + 'px';
+            
+            const photos = shape.querySelectorAll('.heart-photo');
+            let idx = 0;
+            
+            rows.forEach((count, r) => {
+                const y = r * (H + gap);
+                let xs;
+                if (r === 0) {
+                    xs = [u, 4 * u];
+                } else {
+                    const rowW = count * W + (count - 1) * gap;
+                    const startX = (TW - rowW) / 2;
+                    xs = [];
+                    for (let i = 0; i < count; i++) {
+                        xs.push(startX + i * u);
+                    }
+                }
+                xs.forEach(x => {
+                    const photo = photos[idx++];
+                    if (!photo) return;
+                    photo.style.width = W + 'px';
+                    photo.style.height = H + 'px';
+                    photo.style.left = x + 'px';
+                    photo.style.top = y + 'px';
+                });
+            });
+        }
+
+        function bindImageAsset(img, placeholder, imageId) {
+            img.onload = function() {
+                placeholder.style.display = 'none';
+                this.style.display = 'block';
+            };
+            img.onerror = function() {
+                placeholder.style.display = 'flex';
+                this.style.display = 'none';
+            };
+            const testImg = new Image();
+            testImg.onload = function() {
+                img.src = `assets/${imageId}.jpg`;
+            };
+            testImg.onerror = function() {
+                img.src = `assets/${imageId}.png`;
+            };
+            testImg.src = `assets/${imageId}.jpg`;
+        }
+
+        function createFramedPhoto(data) {
+            const frame = document.createElement('div');
+            frame.className = 'framed-photo';
+            frame.style.top = data.top + '%';
+            frame.style.left = data.left + '%';
+            frame.style.setProperty('--tilt', data.tilt + 'deg');
+            
+            const box = document.createElement('div');
+            box.className = 'frame-imgbox';
+            
+            const img = document.createElement('img');
+            img.style.display = 'none';
+            box.appendChild(img);
+            
+            const placeholder = document.createElement('div');
+            placeholder.className = 'frame-placeholder';
+            placeholder.textContent = data.id;
+            box.appendChild(placeholder);
+            
+            frame.appendChild(box);
+            
+            const label = document.createElement('div');
+            label.className = 'frame-label';
+            label.textContent = data.text || data.id;
+            frame.appendChild(label);
+            
+            bindImageAsset(img, placeholder, data.id);
+            return frame;
+        }
+
+        function createPage(pageData, index) {
+            const page = document.createElement('div');
+            page.className = `page ${index === 0 ? 'active' : ''}`;
+            page.dataset.index = index;
+
+            if (pageData.type === 'title') {
+                page.classList.add(pageData.bgClass);
+                page.appendChild(createParticles());
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'page-overlay';
+                
+                if (pageData.year) {
+                    const year = document.createElement('div');
+                    year.className = 'year';
+                    year.textContent = pageData.year;
+                    overlay.appendChild(year);
+                }
+                
+                const title = document.createElement('div');
+                title.className = 'title';
+                title.textContent = pageData.title;
+                overlay.appendChild(title);
+                
+                const subtitle = document.createElement('div');
+                subtitle.className = 'subtitle';
+                subtitle.textContent = pageData.subtitle;
+                overlay.appendChild(subtitle);
+                
+                page.appendChild(overlay);
+            } else if (pageData.type === 'photo') {
+                const img = document.createElement('img');
+                img.dataset.imageId = pageData.imageId;
+                img.style.display = 'none';
+                page.appendChild(img);
+                
+                const placeholder = document.createElement('div');
+                placeholder.className = 'placeholder';
+                placeholder.textContent = pageData.imageId;
+                page.appendChild(placeholder);
+                
+                img.onload = function() {
+                    placeholder.style.display = 'none';
+                    this.style.display = 'block';
+                };
+                
+                img.onerror = function() {
+                    placeholder.style.display = 'flex';
+                    this.style.display = 'none';
+                };
+                
+                const jpgPath = `assets/${pageData.imageId}.jpg`;
+                const pngPath = `assets/${pageData.imageId}.png`;
+                
+                const testImg = new Image();
+                testImg.onload = function() {
+                    img.src = jpgPath;
+                };
+                testImg.onerror = function() {
+                    img.src = pngPath;
+                };
+                testImg.src = jpgPath;
+                
+                if (pageData.caption) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'page-overlay';
+                    overlay.style.background = 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)';
+                    
+                    const caption = document.createElement('div');
+                    caption.className = 'subtitle';
+                    caption.textContent = pageData.caption;
+                    caption.style.position = 'absolute';
+                    caption.style.bottom = '10vh';
+                    overlay.appendChild(caption);
+                    
+                    page.appendChild(overlay);
+                }
+            } else if (pageData.type === 'photoWall') {
+                const wall = document.createElement('div');
+                wall.className = 'photo-wall';
+                
+                pageData.images.forEach((imageId, i) => {
+                    wall.appendChild(createPhotoWallItem(imageId, i));
+                });
+                
+                page.appendChild(wall);
+                
+                if (pageData.caption) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'page-overlay';
+                    overlay.style.background = 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 30%)';
+                    
+                    const caption = document.createElement('div');
+                    caption.className = 'title';
+                    caption.style.fontSize = '5vw';
+                    caption.textContent = pageData.caption;
+                    overlay.appendChild(caption);
+                    
+                    page.appendChild(overlay);
+                }
+            } else if (pageData.type === 'heart') {
+                const container = document.createElement('div');
+                container.className = 'heart-container';
+                
+                const heartShape = document.createElement('div');
+                heartShape.className = 'heart-shape';
+                
+                pageData.images.forEach(imageId => {
+                    heartShape.appendChild(createHeartPhoto(imageId));
+                });
+                
+                layoutHeart(heartShape);
+                window.addEventListener('resize', () => layoutHeart(heartShape));
+                
+                container.appendChild(heartShape);
+                page.appendChild(container);
+                
+                if (pageData.caption) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'page-overlay';
+                    overlay.style.background = 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 25%)';
+                    
+                    const caption = document.createElement('div');
+                    caption.className = 'subtitle';
+                    caption.style.position = 'absolute';
+                    caption.style.bottom = '2vh';
+                    caption.textContent = pageData.caption;
+                    overlay.appendChild(caption);
+                    
+                    page.appendChild(overlay);
+                }
+            } else if (pageData.type === 'panGallery') {
+                const gallery = document.createElement('div');
+                gallery.className = 'pan-gallery';
+                gallery.style.setProperty('--pan-duration', ((pageData.duration || 9000) / 1000 - 1) + 's');
+                
+                pageData.photos.forEach(p => {
+                    gallery.appendChild(createFramedPhoto(p));
+                });
+                
+                page.appendChild(gallery);
+                
+                if (pageData.caption) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'page-overlay';
+                    overlay.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 18%, transparent 82%, rgba(0,0,0,0.65) 100%)';
+                    
+                    const caption = document.createElement('div');
+                    caption.className = 'title';
+                    caption.style.fontSize = '4.5vw';
+                    caption.style.position = 'absolute';
+                    caption.style.top = '3.5vh';
+                    caption.textContent = pageData.caption;
+                    overlay.appendChild(caption);
+                    
+                    page.appendChild(overlay);
+                }
+            }
+
+            return page;
+        }
+
+        function init() {
+            const container = document.getElementById('container');
+            const progress = document.getElementById('progress');
+            
+            pages.forEach((pageData, index) => {
+                const page = createPage(pageData, index);
+                container.appendChild(page);
+                
+                const dot = document.createElement('div');
+                dot.className = `dot ${index === 0 ? 'active' : ''}`;
+                dot.onclick = () => goToPage(index);
+                progress.appendChild(dot);
+            });
+            
+            startAutoPlay();
+        }
+
+        function showPage(index) {
+            const allPages = document.querySelectorAll('.page');
+            const allDots = document.querySelectorAll('.dot');
+            
+            allPages.forEach(page => page.classList.remove('active'));
+            allDots.forEach(dot => dot.classList.remove('active'));
+            
+            allPages[index].classList.add('active');
+            allDots[index].classList.add('active');
+            
+            currentPage = index;
+        }
+
+        function nextPage() {
+            const nextIndex = (currentPage + 1) % pages.length;
+            showPage(nextIndex);
+        }
+
+        function prevPage() {
+            const prevIndex = (currentPage - 1 + pages.length) % pages.length;
+            showPage(prevIndex);
+        }
+
+        function goToPage(index) {
+            showPage(index);
+            if (isPlaying) {
+                stopAutoPlay();
+                startAutoPlay();
+            }
+        }
+
+        function startAutoPlay() {
+            if (playTimer) return;
+            scheduleNext();
+        }
+
+        function scheduleNext() {
+            const dur = pages[currentPage].duration || 5000;
+            playTimer = setTimeout(() => {
+                playTimer = null;
+                nextPage();
+                if (isPlaying) {
+                    scheduleNext();
+                }
+            }, dur);
+        }
+
+        function stopAutoPlay() {
+            if (playTimer) {
+                clearTimeout(playTimer);
+                playTimer = null;
+            }
+        }
+
+        function togglePlay() {
+            const playBtn = document.getElementById('playBtn');
+            if (isPlaying) {
+                stopAutoPlay();
+                playBtn.textContent = '▶';
+                isPlaying = false;
+            } else {
+                startAutoPlay();
+                playBtn.textContent = '⏸';
+                isPlaying = true;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevPage();
+                if (isPlaying) {
+                    stopAutoPlay();
+                    startAutoPlay();
+                }
+            } else if (e.key === 'ArrowRight') {
+                nextPage();
+                if (isPlaying) {
+                    stopAutoPlay();
+                    startAutoPlay();
+                }
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                togglePlay();
+            }
+        });
+    </script>
+</body>
+</html>
