@@ -43,6 +43,10 @@
             opacity: 1;
         }
 
+        .page.no-transition {
+            transition: none;
+        }
+
         .page img {
             width: 100%;
             height: 100%;
@@ -349,6 +353,22 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.85);
             transition: transform 0.3s;
+            opacity: 0;
+        }
+
+        .page.active .heart-photo {
+            animation: heartPhotoIn 0.8s ease-out both;
+        }
+
+        @keyframes heartPhotoIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .heart-photo:hover {
@@ -478,19 +498,7 @@
             {
                 type: 'panGallery',
                 caption: '团队风采',
-                duration: 9000,
-                photos: [
-                    { id: '0019', text: '那年夏天', top: 3, left: 6, tilt: -6 },
-                    { id: '0020', text: '一起拼搏', top: 8, left: 64, tilt: 5 },
-                    { id: '0021', text: '欢笑时光', top: 20, left: 34, tilt: -3 },
-                    { id: '0022', text: '并肩前行', top: 27, left: 4, tilt: 6 },
-                    { id: '0023', text: '精彩每一刻', top: 38, left: 66, tilt: -5 },
-                    { id: '0024', text: '团队力量', top: 47, left: 22, tilt: 4 },
-                    { id: '0025', text: '共同成长', top: 58, left: 58, tilt: -4 },
-                    { id: '0026', text: '难忘回忆', top: 66, left: 8, tilt: 5 },
-                    { id: '0027', text: '未来可期', top: 78, left: 40, tilt: -6 },
-                    { id: '0028', text: '我们', top: 88, left: 68, tilt: 3 }
-                ]
+                photos: ['0019', '0020', '0021', '0022', '0023', '0024', '0025', '0026', '0027', '0028', '0019', '0020', '0021', '0022', '0023', '0024', '0025', '0026', '0027', '0028']
             },
             {
                 type: 'heart',
@@ -509,6 +517,7 @@
         let currentPage = 0;
         let isPlaying = true;
         let playTimer = null;
+        const PAGE_END_DELAY = 5000;
 
         function createParticles() {
             const particles = document.createElement('div');
@@ -645,8 +654,37 @@
                     photo.style.height = H + 'px';
                     photo.style.left = x + 'px';
                     photo.style.top = y + 'px';
+                    photo.style.animationDelay = (idx * 0.1) + 's';
                 });
             });
+        }
+
+        const BASE_LAYOUT = [
+            { top: 9, left: 6, tilt: -6 },
+            { top: 24, left: 64, tilt: 5 },
+            { top: 60, left: 34, tilt: -3 },
+            { top: 81, left: 4, tilt: 6 },
+            { top: 114, left: 66, tilt: -5 },
+            { top: 141, left: 22, tilt: 4 },
+            { top: 174, left: 58, tilt: -4 },
+            { top: 198, left: 8, tilt: 5 },
+            { top: 234, left: 40, tilt: -6 },
+            { top: 264, left: 68, tilt: 3 }
+        ];
+
+        const CYCLE_HEIGHT = 300;
+
+        function computeCanvasHeight(photoCount) {
+            const cycles = Math.ceil(photoCount / 10);
+            const lastBase = BASE_LAYOUT[(photoCount - 1) % 10];
+            const lastTop = lastBase.top + (cycles - 1) * CYCLE_HEIGHT;
+            const photoHeight = 18;
+            return lastTop + photoHeight + 12;
+        }
+
+        function normalizePhoto(p) {
+            if (typeof p === 'string') return { id: p, text: p };
+            return p;
         }
 
         function bindImageAsset(img, placeholder, imageId) {
@@ -668,12 +706,12 @@
             testImg.src = `assets/${imageId}.jpg`;
         }
 
-        function createFramedPhoto(data) {
+        function createFramedPhoto(data, pos) {
             const frame = document.createElement('div');
             frame.className = 'framed-photo';
-            frame.style.top = data.top + '%';
-            frame.style.left = data.left + '%';
-            frame.style.setProperty('--tilt', data.tilt + 'deg');
+            frame.style.top = pos.top + 'vh';
+            frame.style.left = pos.left + '%';
+            frame.style.setProperty('--tilt', pos.tilt + 'deg');
             
             const box = document.createElement('div');
             box.className = 'frame-imgbox';
@@ -830,12 +868,26 @@
                     page.appendChild(overlay);
                 }
             } else if (pageData.type === 'panGallery') {
+                page.classList.add('no-transition');
                 const gallery = document.createElement('div');
                 gallery.className = 'pan-gallery';
-                gallery.style.setProperty('--pan-duration', ((pageData.duration || 9000) / 1000 - 1) + 's');
                 
-                pageData.photos.forEach(p => {
-                    gallery.appendChild(createFramedPhoto(p));
+                const photos = pageData.photos.map(normalizePhoto);
+                const canvasHeight = computeCanvasHeight(photos.length);
+                gallery.style.height = canvasHeight + 'vh';
+                
+                const panDistance = canvasHeight - 100;
+                const panDuration = Math.max(3, Math.round(panDistance / 25));
+                gallery.style.setProperty('--pan-duration', panDuration + 's');
+                
+                photos.forEach((p, i) => {
+                    const base = BASE_LAYOUT[i % 10];
+                    const cycle = Math.floor(i / 10);
+                    const pos = {
+                        ...base,
+                        top: base.top + cycle * CYCLE_HEIGHT
+                    };
+                    gallery.appendChild(createFramedPhoto(p, pos));
                 });
                 
                 page.appendChild(gallery);
@@ -888,6 +940,10 @@
             allDots[index].classList.add('active');
             
             currentPage = index;
+            
+            if (isPlaying) {
+                setupPageAnimationListener(allPages[index], pages[index]);
+            }
         }
 
         function nextPage() {
@@ -910,24 +966,95 @@
 
         function startAutoPlay() {
             if (playTimer) return;
-            scheduleNext();
+            onPageReady(currentPage);
         }
 
-        function scheduleNext() {
-            const dur = pages[currentPage].duration || 5000;
+        function onPageReady(pageIndex) {
+            if (!isPlaying) return;
+            if (playTimer) {
+                clearTimeout(playTimer);
+                playTimer = null;
+            }
             playTimer = setTimeout(() => {
                 playTimer = null;
-                nextPage();
-                if (isPlaying) {
-                    scheduleNext();
-                }
-            }, dur);
+                if (isPlaying) nextPage();
+            }, PAGE_END_DELAY);
         }
 
         function stopAutoPlay() {
             if (playTimer) {
                 clearTimeout(playTimer);
                 playTimer = null;
+            }
+        }
+
+        function setupPageAnimationListener(pageElement, pageData) {
+            const page = pageElement;
+            const pageIdx = currentPage;
+
+            if (pageData.type === 'title') {
+                const targets = page.querySelectorAll('.year, .subtitle, .title');
+                let listened = false;
+                targets.forEach(t => {
+                    t.addEventListener('animationend', function handler(e) {
+                        if (listened) return;
+                        listened = true;
+                        if (currentPage === pageIdx) onPageReady(pageIdx);
+                    });
+                });
+                setTimeout(() => {
+                    if (currentPage === pageIdx && !listened) onPageReady(pageIdx);
+                }, 3000);
+            } else if (pageData.type === 'photo') {
+                const img = page.querySelector('img');
+                if (img) {
+                    let fired = false;
+                    const handler = () => {
+                        if (fired) return;
+                        fired = true;
+                        if (currentPage === pageIdx) onPageReady(pageIdx);
+                    };
+                    img.addEventListener('load', handler);
+                    img.addEventListener('error', handler);
+                    if (img.complete) handler();
+                } else {
+                    setTimeout(() => {
+                        if (currentPage === pageIdx) onPageReady(pageIdx);
+                    }, 1500);
+                }
+            } else if (pageData.type === 'photoWall') {
+                const items = page.querySelectorAll('.photo-wall-item');
+                const lastItem = items[items.length - 1];
+                if (lastItem) {
+                    let fired = false;
+                    lastItem.addEventListener('animationend', (e) => {
+                        if (e.animationName === 'photoFlyIn' && !fired) {
+                            fired = true;
+                            if (currentPage === pageIdx) onPageReady(pageIdx);
+                        }
+                    });
+                }
+            } else if (pageData.type === 'panGallery') {
+                const gallery = page.querySelector('.pan-gallery');
+                if (gallery) {
+                    gallery.addEventListener('animationend', (e) => {
+                        if (e.animationName === 'panDown') {
+                            if (currentPage === pageIdx) onPageReady(pageIdx);
+                        }
+                    });
+                }
+            } else if (pageData.type === 'heart') {
+                const photos = page.querySelectorAll('.heart-photo');
+                const lastPhoto = photos[photos.length - 1];
+                if (lastPhoto) {
+                    let fired = false;
+                    lastPhoto.addEventListener('animationend', (e) => {
+                        if (e.animationName === 'heartPhotoIn' && !fired) {
+                            fired = true;
+                            if (currentPage === pageIdx) onPageReady(pageIdx);
+                        }
+                    });
+                }
             }
         }
 
@@ -949,16 +1076,8 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') {
                 prevPage();
-                if (isPlaying) {
-                    stopAutoPlay();
-                    startAutoPlay();
-                }
             } else if (e.key === 'ArrowRight') {
                 nextPage();
-                if (isPlaying) {
-                    stopAutoPlay();
-                    startAutoPlay();
-                }
             } else if (e.key === ' ') {
                 e.preventDefault();
                 togglePlay();
